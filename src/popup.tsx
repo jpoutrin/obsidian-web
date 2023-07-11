@@ -109,6 +109,7 @@ const Popup = () => {
     async function handle() {
       try {
         const request = await obsidianRequest(
+          url,
           apiKey,
           "/",
           { method: "get" },
@@ -267,7 +268,7 @@ const Popup = () => {
       const messages: string[] = [];
 
       for (const ref of directReferences) {
-        const meta = await getPageMetadata(apiKey, insecureMode, ref.filename);
+        const meta = await getPageMetadata(url, apiKey, insecureMode, ref.filename);
 
         if (typeof meta.frontmatter["web-badge-message"] === "string") {
           messages.push(meta.frontmatter["web-badge-message"]);
@@ -286,7 +287,7 @@ const Popup = () => {
     }
 
     async function handle() {
-      const allMentions = await getUrlMentions(apiKey, insecureMode, url);
+      const allMentions = await getUrlMentions(url, apiKey, insecureMode);
 
       setMentions(allMentions.mentions);
       setDirectReferences(allMentions.direct);
@@ -405,6 +406,7 @@ const Popup = () => {
     let result: Response;
     try {
       result = await obsidianRequest(
+        url,
         apiKey,
         compiledUrl,
         request,
@@ -532,6 +534,7 @@ const Popup = () => {
                     <div className="mentions">
                       {directReferences.map((ref) => (
                         <MentionNotice
+                          url={url}
                           key={ref.filename}
                           type="direct"
                           apiKey={apiKey}
@@ -554,6 +557,7 @@ const Popup = () => {
                           <MentionNotice
                             key={ref.filename}
                             type="mention"
+                            url={url}
                             apiKey={apiKey}
                             insecureMode={insecureMode}
                             templateSuggestion={searchMatchMentionTemplate}

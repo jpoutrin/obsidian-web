@@ -9,6 +9,7 @@ import { OutputPreset, SearchJsonResponseItem } from "../types";
 import { openFileInObsidian } from "../utils";
 
 export interface Props {
+  url: string;
   apiKey: string;
   insecureMode: boolean;
   type: "mention" | "direct";
@@ -22,6 +23,7 @@ export interface Props {
 const MentionNotice: React.FC<Props> = ({
   type,
   templateSuggestion,
+  url,
   apiKey,
   insecureMode,
   presets,
@@ -52,7 +54,7 @@ const MentionNotice: React.FC<Props> = ({
       <Link
         title="Open in Obsidian"
         onClick={() =>
-          openFileInObsidian(apiKey, insecureMode, mention.filename)
+          openFileInObsidian(url, apiKey, insecureMode, mention.filename)
         }
       >
         {mention.filename}

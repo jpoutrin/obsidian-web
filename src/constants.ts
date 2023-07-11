@@ -14,6 +14,7 @@ export const DefaultLocalSettings: ExtensionLocalSettings = {
   version: "0.1",
   insecureMode: false,
   apiKey: "",
+  url: "https://127.0.0.1:3000",
 };
 
 export const DefaultSyncSettings: ExtensionSyncSettings = {

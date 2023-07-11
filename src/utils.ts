@@ -17,9 +17,9 @@ import { DefaultSyncSettings, DefaultLocalSettings } from "./constants";
 const HandlebarsCallbacks: Record<
   string,
   | {
-      resolve: (value: string | PromiseLike<string>) => void;
-      reject: (reason?: any) => void;
-    }
+    resolve: (value: string | PromiseLike<string>) => void;
+    reject: (reason?: any) => void;
+  }
   | undefined
 > = {};
 
@@ -61,11 +61,13 @@ export function normalizeCacheUrl(urlString: string): string {
 }
 
 export async function openFileInObsidian(
+  url: string,
   apiKey: string,
   insecureMode: boolean,
   filename: string
 ): ReturnType<typeof obsidianRequest> {
   return obsidianRequest(
+    url,
     apiKey,
     `/open/${filename}`,
     { method: "post" },
@@ -74,11 +76,13 @@ export async function openFileInObsidian(
 }
 
 export async function getPageMetadata(
+  url: string,
   apiKey: string,
   insecureMode: boolean,
   filename: string
 ): Promise<FileMetadataObject> {
   const result = await obsidianRequest(
+    url,
     apiKey,
     `/vault/${filename}`,
     {
@@ -94,21 +98,21 @@ export async function getPageMetadata(
 }
 
 export async function getUrlMentions(
+  url: string,
   apiKey: string,
-  insecureMode: boolean,
-  url: string
+  insecureMode: boolean
 ): Promise<{
   mentions: SearchJsonResponseItem[];
   direct: SearchJsonResponseItem[];
 }> {
   async function handleMentions() {
-    return await obsidianSearchRequest(apiKey, insecureMode, {
+    return await obsidianSearchRequest(url, apiKey, insecureMode, {
       regexp: [`${escapeStringRegexp(url)}(?=\\s|\\)|$)`, { var: "content" }],
     });
   }
 
   async function handleDirect() {
-    return await obsidianSearchRequest(apiKey, insecureMode, {
+    return await obsidianSearchRequest(url, apiKey, insecureMode, {
       glob: [{ var: "frontmatter.url" }, url],
     });
   }
@@ -120,11 +124,13 @@ export async function getUrlMentions(
 }
 
 export async function obsidianSearchRequest(
+  url: string,
   apiKey: string,
   insecureMode: boolean,
   query: Record<string, any>
 ): Promise<SearchJsonResponseItem[]> {
   const result = await obsidianRequest(
+    url,
     apiKey,
     "/search/",
     {
@@ -141,6 +147,7 @@ export async function obsidianSearchRequest(
 }
 
 export async function obsidianRequest(
+  host: string,
   apiKey: string,
   path: string,
   options: RequestInit,
@@ -157,9 +164,7 @@ export async function obsidianRequest(
   };
 
   return fetch(
-    `http${insecureMode ? "" : "s"}://127.0.0.1:${
-      insecureMode ? "27123" : "27124"
-    }${path}`,
+    `${host}${path}`,
     requestOptions
   );
 }

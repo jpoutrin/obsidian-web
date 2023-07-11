@@ -75,6 +75,12 @@ const Options = () => {
   const [apiKeyOk, setApiKeyOk] = useState<boolean>(false);
   const [apiKeyError, setApiKeyError] = useState<string>();
 
+  const [url, setUrl] = useState<string>("");
+  const [urlOk, setUrlOk] = useState<boolean>(false);
+  // const [apiKeyError, setApiKeyError] = useState<string>();
+
+
+
   const [searchEnabled, setSearchEnabled] = useState<boolean>(false);
   const [searchBackgroundEnabled, setSearchBackgroundEnabled] =
     useState<boolean>(false);
@@ -97,6 +103,8 @@ const Options = () => {
   useEffect(() => {
     async function handle() {
       setApiKeyOk(false);
+      setUrlOk(false);
+
       let usedInsecureMode = false;
 
       if (apiKey === "") {
@@ -104,10 +112,11 @@ const Options = () => {
       } else {
         let result: Response;
         try {
-          result = await obsidianRequest(apiKey, "/", { method: "get" }, false);
+          result = await obsidianRequest(url, apiKey, "/", { method: "get" }, false);
         } catch (e) {
           try {
             result = await obsidianRequest(
+              url,
               apiKey,
               "/",
               { method: "get" },
@@ -116,8 +125,7 @@ const Options = () => {
             usedInsecureMode = true;
           } catch (e) {
             setApiKeyError(
-              `Unable to connect to Obsidian: ${
-                (e as Error).message
+              `Unable to connect to Obsidian: ${(e as Error).message
               }. Obsidian Local REST API is probably running in secure-only mode, and your browser probably does not trust its certificate.  Either enable insecure mode from Obsidian Local REST API's settings panel, or see the settings panel for instructions regarding where to acquire the certificate you need to configure your browser to trust.`
             );
             return;
@@ -127,17 +135,18 @@ const Options = () => {
         const body: StatusResponse = await result.json();
         if (result.status !== 200) {
           setApiKeyError(
-            `Unable to connect to Obsidian: (Status Code ${
-              result.status
+            `Unable to connect to Obsidian: (Status Code ${result.status
             }) ${JSON.stringify(body)}.`
           );
           return;
         }
 
-        setPluginVersion(body.versions.self);
+        if (body.versions && body.versions.self) {
+          setPluginVersion(body.versions.self);
+        }
 
         if (!body.authenticated) {
-          setApiKeyError(`Your API key was not accepted.`);
+          setApiKeyError(`Your API key was not accepted. is the server url correct ?`);
           return;
         }
 
@@ -192,6 +201,7 @@ const Options = () => {
       const syncSettings = await getSyncSettings(chrome.storage.sync);
       const localSettings = await getLocalSettings(chrome.storage.local);
 
+      setUrl(localSettings.url);
       setApiKey(localSettings.apiKey);
       setPresets(syncSettings.presets);
       setSearchEnabled(syncSettings.searchEnabled);
@@ -519,6 +529,21 @@ const Options = () => {
                       </div>
                     </>
                   )}
+              </div>
+              <div className="option">
+                <h2>Remote Server</h2>
+                <Typography paragraph={true}>
+                  The default configuration will connect to the Local REST API. But you can decide to use a remote api.
+                  The benefit of the remote api is that:
+                  - it will work on mobile device.
+                  - it allows specific post-treatments of the clipped content.
+                </Typography>
+                <TextField
+                  label="host"
+                  value={url}
+                  helperText="This is the base url of the remote api. Warning: use https to protect your data."
+                  onChange={(event) => setUrl(event.target.value)}
+                />
               </div>
               <div className="option">
                 <h2>Note Recall</h2>

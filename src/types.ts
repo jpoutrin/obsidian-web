@@ -11,6 +11,7 @@ export interface OutputPreset {
 export interface ExtensionLocalSettings {
   version: string;
   apiKey: string;
+  url: string;
   insecureMode?: boolean;
 }
 

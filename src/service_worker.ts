@@ -19,8 +19,8 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
   try {
     const mentions = await getUrlMentions(
       localSettings.apiKey,
+      localSettings.url,
       localSettings.insecureMode || false,
-      url
     );
 
     if (mentions.direct.length > 0) {
@@ -62,6 +62,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 
     for (const mention of mentions.direct) {
       const mentionData = await obsidianRequest(
+        localSettings.url,
         localSettings.apiKey,
         `/vault/${mention.filename}`,
         {
